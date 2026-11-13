@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th = "http://www.thymeleaf.org" xmlns:xsi = "http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation = "http://www.thymeleaf.org" xmlns = "http://www.w3.org/1999/html">
+<head>
+    <meta charset = "UTF-8">
+    <title>News</title>
+    <link rel = "stylesheet" th:href = "@{/css/app.css}">
+</head>
+<body>
+<main class = "page-container">
+    <div th:replace = "~{fragments/header :: siteHeader}"></div>
+<table align = "center">
+<tr th:each = "news : ${newsList}" th:if = "${news.Hidden}">
+    <td th:if = "!${news.likeByUser}" style = "width:10%">
+        <form th:action = "@{/addLike/{newsId}(newsId=${news.id})}" method = "post">
+            <button>Like</button>
+            [[${news.pointsPerPost}]]
+        </form>
+    </td>
+    <td th:if = "${news.likeByUser}">
+        <form th:action = "@{/removeLike/{newsId}(newsId=${news.id})}" method = "post">
+            <button>Unlike</button>
+            [[${news.pointsPerPost}]]
+        </form>
+    </td>
+    <td><h5><a th:href = "${news.url}">[[${news.title}]]</a></h5>
+        <h6 th:text = "${news.createdAt}"></h6>
+        <th:block th:if = "!${news.Hidden}">
+            <form th:action = "@{/hideNews/{newsId}(newsId=${news.id})}" method = "post">
+                <button>Hide</button>
+            </form>
+        </th:block>
+        <th:block th:if = "${news.Hidden}">
+            <form th:action = "@{/removeHide/{newsId}(newsId=${news.id})}" method = "post">
+                <button>UnHide</button>
+            </form>
+        </th:block>
+        <th:block  th:if = "!${news.Favorite}">
+            <form th:action = "@{/favoriteNews/{newsId}(newsId=${news.id})}" method = "post">
+                <button>Favorite</button>
+            </form>
+        </th:block>
+        <th:block th:if = "${news.Favorite}">
+            <form th:action = "@{/removeFavorite/{newsId}(newsId=${news.id})}" method = "post">
+                <button>Un-Favorite</button>
+            </form>
+        </th:block>
+    </td>
+</tr>
+</table>
+</main>
+</body>
+</html>

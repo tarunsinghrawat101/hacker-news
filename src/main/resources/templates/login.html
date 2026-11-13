@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Login</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<main class="page-container">
+    <div th:replace="~{fragments/header :: siteHeader}"></div>
+<table align="center">
+  <tr th:if="${param.error}">
+    <td>
+        <div>Invalid EmailId or password.</div>
+    </td>
+  </tr>
+  <tr th:if="${param.logout}">
+    <td><div>You have been logged out.</div></td>
+  </tr>
+  <tr>
+    <td><h1> User Login Page </h1></td>
+  </tr>
+  <br>
+  <form th:action="@{/login}" method="POST">
+    <tr>
+      <td><label> Email Id : </label></td><td><input type="email" name="username" placeholder="Enter Email ID"></td>
+    </tr>
+    <tr>
+      <td><label>Password : </label></td><td><input type="password" name="password" placeholder="Enter Password"/></td>
+    </tr>
+    <tr align="right">
+      <td align="right"><input type="submit" value="Log In"/></td>
+    </tr>
+    <br>
+    <br>
+    <tr>
+      <td><a th:href="@{/forgotPassword}">Forgot Password</a> </td>
+    </tr>
+  </form>
+  <tr>
+    <td><span>New user? <a th:href="@{/registration}">Register here</a></span></td>
+  </tr>
+  <br>
+  <tr>
+    <td><a th:href="@{/}">Continue without Login</a></td>
+  </tr>
+</table>
+</main>
+</body>
+</html>
+

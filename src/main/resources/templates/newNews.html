@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity3">
+<head>
+    <meta charset="UTF-8">
+    <title>Hacker News</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<main class="page-container">
+    <div th:replace="~{fragments/header :: siteHeader}"></div>
+<div class="main">
+    <header class="header">
+        <nav class="insideheader">
+            <a th:href="@{/}"><b>Hacker News</b></a>
+            <span>|</span>
+            <a th:href="@{'/newNews/' + ${currentPage} + '?sortField=id&sortDir=desc&keyword=' + ${keyword}}">New</a>
+            <span>|</span>
+            <a th:href="@{'/pastNews/' + ${currentPage} + '?sortField=id&sortDir=asc&keyword=' + ${keyword}}">Past</a>
+            <span>|</span>
+            <a href="#ask">Ask</a>
+            <span>|</span>
+            <a href="#show">Show</a>
+            <span>|</span>
+            <a href="#jobs">Jobs</a>
+            <th:block th:if="${user != null and !admin}">
+                <span>|</span>
+                <a th:href="@{/createNewNews}">Submit</a>
+            </th:block>
+            <th:block th:if="${user != null and !admin}">
+                <span>|</span>
+                <a th:href="@{/discover/recommended}">Recommended</a>
+                <span>|</span>
+                <a th:href="@{/discover/trending}">Trending</a>
+            </th:block>
+            <th:block th:if="${user != null and !admin}">
+                <span>|</span>
+                <a th:href="@{/userProfile}" th:text="${sessionUser.name}">Profile</a>
+            </th:block>
+            <th:block th:if="${sessionUser != null}">
+                <span>|</span>
+                <a th:href="@{/logout}" sec:authorize="isAuthenticated()">Logout</a>
+            </th:block>
+            <th:block th:if="${sessionUser == null}">
+                <span>|</span>
+                <a class="login" th:href="@{/login}">Login</a>
+            </th:block>
+        </nav>
+    </header>
+
+    <h3 class="section-title" th:if="${discoveryMode != null}" th:text="${discoveryMode}"></h3>
+
+    <table class="table">
+        <tr th:each="news : ${newsList}"
+            th:if="${user == null or admin or !news.hidden}">
+            <td class="vote-cell" th:if="${user != null and !admin}">
+                <form th:if="${!news.likeByUser}"
+                      th:action="@{/addLike/{newsId}/{value}(newsId=${news.id},value=${value})}" method="post">
+                    <button type="submit">▲ Like</button>
+                </form>
+                <form th:if="${news.likeByUser}"
+                      th:action="@{/removeLike/{newsId}(newsId=${news.id})}" method="post">
+                    <button type="submit">Unlike</button>
+                </form>
+                <span th:text="${news.pointsPerPost}">0</span> points
+            </td>
+            <td>
+                <h4>
+                    <a class="news" th:if="${user != null and !admin}"
+                       th:href="@{'/newsOpen/' + ${news.id}}" th:text="${news.title}">Story title</a>
+                    <span th:if="${user == null or admin}" th:text="${news.title}">Story title</span>
+                </h4>
+                <p class="story-content"
+                   th:if="${news.content != null and !#strings.isEmpty(news.content)}"
+                   th:text="${news.content}"></p>
+                <small class="meta">
+                    Posted by <strong th:text="${news.name != null ? news.name : 'Unknown'}">Unknown</strong>
+                    · <span th:text="${news.createdAt}"></span>
+                </small>
+
+                <div class="actions" th:if="${user != null and !admin}">
+                    <form th:action="@{/hideNews/{newsId}(newsId=${news.id})}" method="post">
+                        <button type="submit">Hide</button>
+                    </form>
+                    <form th:if="${!news.favorite}"
+                          th:action="@{/favoriteNews/{newsId}(newsId=${news.id})}" method="post">
+                        <button type="submit">Favorite</button>
+                    </form>
+                    <form th:if="${news.favorite}"
+                          th:action="@{/removeFavorite/{newsId}(newsId=${news.id})}" method="post">
+                        <button type="submit">Un-Favorite</button>
+                    </form>
+                    <a th:if="${user != null and !admin}"
+                       th:href="@{'/newsOpen/' + ${news.id}}">Comments</a>
+                </div>
+            </td>
+        </tr>
+    </table>
+
+    <div class="pagination">
+        <a th:if="${currentPage > 1}"
+           th:href="@{${listingPath} + '/' + ${currentPage - 1} + '?sortField=' + ${sortField} + '&sortDir=' + ${sortDir} + '&keyword=' + ${keyword}}">
+            Previous
+        </a>
+        <span th:text="'Page ' + ${currentPage} + ' of ' + ${totalPages}"></span>
+        <a th:if="${currentPage < totalPages}"
+           th:href="@{${listingPath} + '/' + ${currentPage + 1} + '?sortField=' + ${sortField} + '&sortDir=' + ${sortDir} + '&keyword=' + ${keyword}}">
+            Next
+        </a>
+    </div>
+
+    <form id="searchForm" th:action="@{${listingPath} + '/' + ${currentPage}}" method="get">
+        <input type="hidden" name="sortField" th:value="${sortField}">
+        <input type="hidden" name="sortDir" th:value="${sortDir}">
+        <input type="text" name="keyword" th:value="${keyword}" placeholder="Search news">
+        <button type="submit">Search</button>
+    </form>
+</div>
+</main>
+</body>
+</html>

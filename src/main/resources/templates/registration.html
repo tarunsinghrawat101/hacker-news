@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Register User</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<main class="page-container">
+    <div th:replace="~{fragments/header :: siteHeader}"></div>
+<table align="center">
+  <tr th:if="${param.success}">
+    <td><div>You've successfully registered to our awesome app!</div></td>
+  </tr>
+  <tr>
+    <td><h1>Registration</h1></td>
+  </tr>
+  <form th:action="@{/registration}" method="post" th:object="${user}">
+    <tr>
+      <td>Name : </td>
+        <td><input id="name" th:field="*{name}" required/></td>
+    </tr>
+    <tr>
+      <td>Email : </td>
+        <td><input id="email" th:field="*{email}" required/></td>
+    </tr>
+    <tr>
+      <td>Password : </td>
+        <td><input id="password" type="password" th:field="*{password}" required/></td>
+    </tr>
+    <tr>
+      <td><button type="submit">Register</button></td>
+    </tr>
+  </form>
+  <tr>
+    <td><span>Already registered? <a th:href="@{/login}">Login here</a></span></td>
+  </tr>
+</table>
+</main>
+</body>
+</html>

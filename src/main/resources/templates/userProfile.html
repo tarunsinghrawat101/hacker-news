@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Profile</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<main class="page-container">
+    <div th:replace="~{fragments/header :: siteHeader}"></div>
+    <table align="center">
+        <tr>
+            <td>
+                <label>User Name:</label>
+            </td><td>[[${user.name}]]</td>
+        </tr>
+        <tr>
+            <td>
+                <label>Email Id:</label>
+            </td>
+            <td>[[${user.email}]]</td>
+        </tr>
+        <tr>
+            <td colspan="2">
+                <h3>Karma:</h3>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <label>News Liked:</label>
+            </td>
+            <td>[[${newsLike}]]</td>
+        </tr>
+        <tr>
+            <td>
+                <label>News Posted:</label>
+            </td>
+            <td>[[${newsPosted}]]</td>
+        </tr>
+        <tr>
+            <td>
+                <label>Total Comments:</label>
+            </td>
+            <td>[[${comments}]]</td>
+        </tr>
+        <tr>
+            <td>
+                <a th:href="@{/hiddenNews}">Hidden News</a>
+            </td>
+        </tr>
+        <tr>
+            <td><a th:href="@{/favoriteNews}">Favorite News</a>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <a th:href="@{/userNews}">Personal News</a>
+            </td>
+        </tr>
+    </table>
+
+    <section class="dashboard-section">
+        <h2>My posts</h2>
+        <p class="muted">Your posts and their current moderation status appear here. Select one or more posts to hide them from your feed. Hidden posts remain available under Hidden News.</p>
+        <p th:if="${#lists.isEmpty(myPosts)}" class="empty">No posts yet. <a th:href="@{/createNewNews}">Create one</a>.</p>
+
+        <form th:if="${!#lists.isEmpty(myPosts)}" id="hideSelectedPosts" method="post" th:action="@{/profile/hide}">
+            <button type="submit" onclick="return confirm('Hide the selected posts from your feed?')">Hide selected posts</button>
+        </form>
+
+        <article class="post-row" th:each="post : ${myPosts}">
+            <label class="select-post" th:if="${!post.hidden}">
+                <input type="checkbox" name="postIds" th:value="${post.id}" form="hideSelectedPosts" aria-label="Select post to hide">
+            </label>
+            <details>
+                <summary>
+                    <span class="profile-post-heading" th:text="${post.title}">Post title</span>
+                    <span class="state-pill" th:if="${post.adminDeleted}" style="background:#fee2e2;color:#991b1b">DELETED BY ADMIN</span>
+                    <span class="state-pill" th:unless="${post.adminDeleted}"
+                          th:classappend="${' state-' + post.state.name().toLowerCase()}"
+                          th:text="${post.state}">DRAFT</span>
+                    <span class="state-pill" th:if="${post.hidden}" style="background:#e5e7eb;color:#374151">HIDDEN BY YOU</span>
+                </summary>
+                <div class="post-expanded">
+                    <p class="muted" th:text="${post.createdAt}">Created</p>
+                    <p th:if="${post.url != null and !#strings.isEmpty(post.url)}">
+                        Link: <a th:href="${post.url}" th:text="${post.url}" target="_blank" rel="noopener noreferrer">URL</a>
+                    </p>
+                    <p class="news-content" th:if="${post.content != null}" th:text="${post.content}">Content</p>
+                    <p><strong>Current status:</strong>
+                        <span th:if="${post.adminDeleted}">Deleted by administrator — state changes and editing are disabled.</span>
+                        <span th:unless="${post.adminDeleted}" th:text="${post.state}">DRAFT</span>
+                    </p>
+                    <div class="state-actions" th:if="${!post.adminDeleted}">
+                        <form th:if="${post.state.name() == 'DRAFT'}" th:action="@{/story/{id}/transition/SUBMIT(id=${post.id})}" method="post">
+                            <button type="submit">Submit for approval</button>
+                        </form>
+                        <form th:if="${post.state.name() == 'REJECTED'}" th:action="@{/story/{id}/transition/RESUBMIT(id=${post.id})}" method="post">
+                            <button type="submit">Resubmit for approval</button>
+                        </form>
+                        <form th:if="${post.state.name() == 'PUBLISHED'}" th:action="@{/story/{id}/transition/ARCHIVE(id=${post.id})}" method="post">
+                            <button type="submit">Archive</button>
+                        </form>
+                        <form th:if="${post.state.name() == 'ARCHIVED'}" th:action="@{/story/{id}/transition/RESTORE(id=${post.id})}" method="post">
+                            <button type="submit">Restore previously approved post</button>
+                        </form>
+                        <span th:if="${post.state.name() == 'PENDING_REVIEW'}" class="muted">Awaiting admin approval</span>
+                        <a th:href="@{/editNews/{id}(id=${post.id})}">Edit post</a>
+                    </div>
+                    <div class="state-actions">
+                        <form th:if="${!post.hidden}" th:action="@{/profile/hide/{id}(id=${post.id})}" method="post">
+                            <button type="submit">Hide this post</button>
+                        </form>
+                        <form th:if="${post.hidden}" th:action="@{/removeHide/{newsId}(newsId=${post.id})}" method="post">
+                            <button type="submit">Unhide this post</button>
+                        </form>
+                    </div>
+                    <p class="muted" th:if="${post.adminDeleted}">This post is retained in your profile for reference. You cannot edit it, submit it, or change its state.</p>
+                </div>
+            </details>
+        </article>
+    </section>
+</main>
+</body>
+</html>

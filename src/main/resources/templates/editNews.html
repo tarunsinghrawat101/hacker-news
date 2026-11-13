@@ -1,0 +1,136 @@
+
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Post</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+
+<main class="page-container">
+    <div th:replace="~{fragments/header :: siteHeader}"></div>
+    <section class="dashboard-section edit-post-section" style="max-width: 850px; margin: 24px auto;">
+        <h1>Edit Post</h1>
+        <p class="error-message" th:if="${error}" th:text="${error}">
+        </p>
+
+        <p class="muted">
+            URL is optional. To submit a draft for admin review,
+            the post text must contain at least 1,292 words.
+            Save as draft to continue working later.
+        </p>
+
+        <form id="editPostForm" th:action="@{/updateNews}" th:object="${newsEntity}" method="post">
+            <input type="hidden" th:field="*{id}">
+            <div class="form-group">
+                <label for="title">Title *</label>
+                <input type="text" id="title" th:field="*{title}" required
+                        maxlength="255" style="display: block; width: 100%; padding: 10px;">
+            </div>
+            <br>
+            <div class="form-group">
+                <label for="url">URL (Optional)</label>
+
+                <input type="url" id="url" th:field="*{url}" placeholder="https://example.com"
+                        style="display: block; width: 100%; padding: 10px;"/>
+            </div>
+
+            <br>
+
+            <div class="form-group">
+                <label for="content">Post Text *</label>
+
+                <textarea id = "content" th:field = "*{content}" required
+                        style=" display: block;
+                            width: 100%;
+                            min-height: 360px;
+                            padding: 10px;"
+                ></textarea>
+            </div>
+            <div class="word-count-section">
+                <p>Word count:<strong id="wordCount">0</strong>/ 1,292 minimum for submission</p>
+                <p id="validationMessage" class="muted" aria-live="polite"></p>
+            </div>
+            <div class="form-actions">
+                <button type="submit" name="saveAsDraft" value="false">Submit for Admin Review</button>
+                <button type="submit" name="saveAsDraft" value="true">Save as Draft</button>
+            </div>
+        </form>
+    </section>
+</main>
+<script>
+    (function () {
+        const editPostForm = document.getElementById('editPostForm');
+        const contentInput =  document.getElementById('content');
+        const wordCountDisplay = document.getElementById('wordCount');
+        const validationMessage = document.getElementById('validationMessage');
+        const MIN_WORD_COUNT = 1292;
+
+        function getWordCount() {
+
+            const content = contentInput.value.trim();
+
+            return content
+                ? content.split(/\s+/u).length
+                : 0;
+        }
+
+        function updateWordCount() {
+            const currentWordCount = getWordCount();
+            const remainingWords = MIN_WORD_COUNT - currentWordCount;
+            wordCountDisplay.textContent = currentWordCount;
+
+            if (currentWordCount >= MIN_WORD_COUNT) {
+                validationMessage.textContent =
+                    'Minimum word count reached.';
+
+            } else {
+                validationMessage.textContent =
+                    'You need ' + remainingWords +
+                    ' more words to submit. ' +
+                    'You can still save this as a draft.';
+
+            }
+        }
+
+        function validateSubmission(event) {
+
+            if (
+                event.submitter &&
+                event.submitter.name === 'saveAsDraft' &&
+                event.submitter.value === 'true'
+            ) {
+                return;
+            }
+
+            if (getWordCount() < MIN_WORD_COUNT) {
+
+                event.preventDefault();
+
+                validationMessage.textContent =
+                    'At least 1,292 words are required to submit. ' +
+                    'Save as draft to continue later.';
+
+                contentInput.focus();
+            }
+        }
+
+        contentInput.addEventListener(
+            'input',
+            updateWordCount
+        );
+
+        editPostForm.addEventListener(
+            'submit',
+            validateSubmission
+        );
+
+        updateWordCount();
+
+    })();
+</script>
+
+</body>
+</html>

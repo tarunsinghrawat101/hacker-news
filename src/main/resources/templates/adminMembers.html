@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><title>Admin Portal - Members</title>
+<link rel="stylesheet" th:href="@{/css/app.css}"></head>
+<body><main class="page-container">
+<div th:replace="~{fragments/header :: siteHeader}"></div>
+<section class="dashboard-section">
+<h1>Admin portal</h1>
+<p class="muted">Select a member to review pending submissions and manage all their posts.</p>
+<table class="admin-table">
+<thead><tr><th>Member (click to open)</th>
+    <th>Email</th>
+    <th>Pending approval</th>
+    <th>All posts</th></tr></thead>
+<tbody>
+<tr th:each="entry : ${members}">
+<td><a th:href="@{/admin/member/{id}(id=${entry.member.id})}" th:text="${entry.member.name}">Member</a></td>
+<td th:text="${entry.member.email}">email</td>
+<td><strong th:text="${entry.pending}">0</strong></td>
+    <td th:text="${entry.total}">0</td>
+</tr>
+<tr th:if="${unassignedCount > 0}">
+<td><a th:href="@{/admin/unassigned}">Legacy / unassigned posts</a></td>
+<td>Missing author email</td>
+    <td th:text="${unassignedPending}">0</td>
+    <td th:text="${unassignedCount}">0</td>
+</tr>
+</tbody></table>
+</section></main></body></html>

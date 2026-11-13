@@ -1,0 +1,74 @@
+
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${discoveryMode} + ' | Hacker News'">Discovery</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+
+<body>
+<main class="page-container">
+    <div th:replace="~{fragments/header :: siteHeader}"></div>
+    <section class="news-card">
+        <h1 class="news-title" th:text="${news.title}"></h1>
+        <p class="news-content"
+           th:if="${news.content != null and !news.content.isEmpty()}"
+           th:text="${news.content}">
+        </p>
+    </section>
+    <section class="comments-section">
+        <h3 class="comments-heading">Comments</h3>
+        <form th:if="${sessionUser != null}"
+              class="comment-form"
+              th:action="@{'/saveComment/' + ${news.id}}"
+              th:object="${commentAdd}"
+              method="post">
+            <textarea th:field="*{comment}"
+                      placeholder="Write a comment..."
+                      required>
+            </textarea>
+            <button type="submit">Add Comment</button>
+        </form>
+        <div th:if="${sessionUser == null}"
+             class="error-message"
+             role="alert">
+            You are not logged in.
+            Please <a th:href="@{/login}">log in</a> to post a comment.
+        </div>
+        <div th:each="comment : ${comments}" class="comment-item">
+            <div class="comment-details">
+                <div class="comment-author">
+                    <span th:text="${comment.email}"></span>
+                    <span> | </span>
+                    <span th:text="${comment.name}"></span>
+                </div>
+                <div class="comment-text"
+                     th:text="${comment.comment}">
+                </div>
+            </div>
+
+            <div class="comment-actions"
+                 th:if="${sessionUser != null}">
+                <th:block th:if="${!admin and sessionUser.email == comment.email}">
+                    <a th:href="@{'/updateComment/' + ${comment.id}}">Update</a>
+                    <form th:action="@{'/deleteComment/' + ${comment.id}}"
+                          method="post"
+                          class="inline-delete-form">
+                        <button type="submit" class="link-button">Delete</button>
+                    </form>
+                </th:block>
+                <th:block th:if="${admin}">
+                    <form th:action="@{'/deleteComment/' + ${comment.id}}"
+                          method="post"
+                          class="inline-delete-form">
+                        <button type="submit" class="link-button">Delete</button>
+                    </form>
+                </th:block>
+            </div>
+        </div>
+    </section>
+</main>
+</body>
+</html>

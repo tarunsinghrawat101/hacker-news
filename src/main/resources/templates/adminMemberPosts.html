@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><title>Admin Portal - Member Posts</title>
+<link rel="stylesheet" th:href="@{/css/app.css}"></head>
+<body><main class="page-container">
+<div th:replace="~{fragments/header :: siteHeader}"></div>
+<section class="dashboard-section">
+<p><a th:href="@{/admin}">&larr; All members</a></p>
+<h1 th:text="${member != null ? member.name + ' — posts' : 'Legacy / unassigned posts'}">Member posts</h1>
+<p th:if="${member != null}" th:text="${member.email}" class="muted">Email</p>
+<p class="muted">Tick one or more posts, then use the state buttons. All selected posts are updated together. Click any title to expand details. You can also change a single post below it.</p>
+<div class="notice-success" th:if="${success}" th:text="${success}">Success</div>
+<div class="error-message" th:if="${error}" th:text="${error}">Error</div>
+<form id="bulkStateForm" method="post" th:action="${postAction}">
+    <div class="bulk-toolbar">
+        <strong>Set selected posts to:</strong>
+        <button type="submit" name="targetState" value="DRAFT">Back to draft</button>
+        <button type="submit" name="targetState" value="PENDING_REVIEW">Pending review</button>
+        <button type="submit" name="targetState" value="PUBLISHED">Published / Approve</button>
+        <button type="submit" name="targetState" value="REJECTED">Reject</button>
+        <button type="submit" name="targetState" value="ARCHIVED">Archive</button>
+    </div>
+</form>
+<form id="bulkDeleteForm" method="post" th:action="${deleteAction}" onsubmit="return confirm('Remove the selected posts from public view? Authors will still see the removal status in their profiles.');">
+    <button type="submit">Remove selected posts from public view</button>
+</form>
+<p class="muted">Admin state changes are explicit privileged state-machine transitions. Posts with no state change are left as-is.</p>
+<p th:if="${#lists.isEmpty(posts)}" class="empty">This member has no posts.</p>
+<section class="review-group" th:if="${!#lists.isEmpty(posts)}">
+<h2>Requires approval</h2>
+<div th:each="post : ${posts}" th:if="${post.state.name() == 'PENDING_REVIEW'}" class="post-row">
+    <label class="select-post" th:unless="${post.adminDeleted}"><input type="checkbox" name="postIds" th:value="${post.id}" form="bulkStateForm" aria-label="Select post"></label>
+    <details><summary><span th:text="${post.title}">Post title</span>
+        <span class="state-pill state-pending_review">PENDING_REVIEW</span>
+        <span class="state-pill" th:if="${post.adminDeleted}" style="background:#fee2e2;color:#991b1b">DELETED BY ADMIN</span></summary>
+        <div th:replace="~{adminPostDetails :: detailsContent}"></div>
+    </details>
+</div>
+</section>
+<section class="review-group" th:if="${!#lists.isEmpty(posts)}">
+<h2>All other posts</h2>
+<div th:each="post : ${posts}" th:if="${post.state.name() != 'PENDING_REVIEW'}" class="post-row">
+    <label class="select-post" th:unless="${post.adminDeleted}"><input type="checkbox" name="postIds" th:value="${post.id}" form="bulkStateForm" aria-label="Select post"></label>
+    <details><summary><span th:text="${post.title}">Post title</span>
+        <span class="state-pill" th:unless="${post.adminDeleted}" th:classappend="${' state-' + post.state.name().toLowerCase()}"
+              th:text="${post.state}">State</span>
+        <span class="state-pill" th:if="${post.adminDeleted}" style="background:#fee2e2;color:#991b1b">DELETED BY ADMIN</span></summary>
+        <div th:replace="~{adminPostDetails :: detailsContent}"></div>
+    </details>
+</div>
+</section>
+</section>
+<script>
+    (function () {
+        const deleteForm = document.getElementById('bulkDeleteForm');
+        const postCheckboxes = document.querySelectorAll(
+            'input[name="postIds"][form="bulkStateForm"]'
+        );
+
+        postCheckboxes.forEach(function (checkbox) {
+
+            checkbox.addEventListener('change', function () {
+                let mirroredInput = deleteForm.querySelector(
+                    'input[data-id="' + checkbox.value + '"]'
+                );
+
+                if (checkbox.checked && !mirroredInput) {
+                    mirroredInput = document.createElement('input');
+                    mirroredInput.type = 'hidden';
+                    mirroredInput.name = 'postIds';
+                    mirroredInput.value = checkbox.value;
+                    mirroredInput.dataset.id = checkbox.value;
+                    deleteForm.appendChild(mirroredInput);
+
+                } else if (!checkbox.checked && mirroredInput) {
+                    mirroredInput.remove();
+                }
+            });
+        });
+    })();
+</script>
+</main></body></html>

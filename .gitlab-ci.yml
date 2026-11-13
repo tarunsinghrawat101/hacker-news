@@ -1,0 +1,33 @@
+#heroku:
+#  stage: deploy
+#  only:
+#    - master
+#  script:
+#    - git config --global user.email "neeraj.tiwari.17.1@mountblue.tech"
+#    - git config --global user.name "NeerajTiwari17"
+#    - rm -rf .git
+#    - git init
+#    - git add .
+#    - git commit -m "deployed"
+#    - git remote add heroku https://heroku:$HEROKU_API_KEY@git.heroku.com/test-auto-deploy.git
+#    - git push -f heroku master
+deploy_heroku:
+  variables:
+    HEROKU_API_KEY: "6f4ef06c-6a36-44fa-ba0e-ab30e4bc116a"
+  image: centos
+  stage: deploy
+  environment: heroku
+  only:
+    - main
+  script:
+    - echo "Deploying for Heroku Cloud Platform"
+    - echo "$HEROKU_API_KEY"
+    - yum install git -y
+    - git remote add heroku https://heroku:$HEROKU_API_KEY@git.heroku.com/hacker-news-appclone.git
+    - git config --global user.email "tarun.rawat.17.1@mountblue.tech"
+    - git config --global user.name "TArunRawat"
+    - git config --global push.default matching
+    - git checkout master
+    - git commit --allow-empty -m "Heroku build trigger notification"
+    - git push -f heroku HEAD:master
+    -

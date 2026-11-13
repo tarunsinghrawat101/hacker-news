@@ -1,0 +1,101 @@
+
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${discoveryMode} + ' | Hacker News'">Hacker News</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+
+<main class="page-container">
+    <div th:replace="~{fragments/header :: siteHeader}"></div>
+    <h3 class="section-title"
+        th:text="${discoveryMode}">
+        Recommended News
+    </h3>
+    <p class="page-subtitle">
+        Explore stories based on relevance, engagement and freshness.
+    </p>
+    <form id="searchForm"
+          class="topic-form"
+          th:if="${discoveryMode == 'Recommended News'}"
+          th:action="@{/discover/recommended}"
+          method="get">
+
+        <input type="text"
+               name="topic"
+               placeholder="Search by topic..."
+               th:value="${topic}">
+
+        <button type="submit">Search</button>
+
+        <a th:href="@{/discover/recommended}">Clear</a>
+    </form>
+
+    <table class="news-list">
+        <tr th:each="ranked : ${stories}">
+            <td>
+                <h4>
+                    <a class="news"
+                       th:href="@{/newsOpen/{id}(id=${ranked.story.id})}"
+                       th:text="${ranked.story.title}">
+                        Story title
+                    </a>
+                </h4>
+
+                <small class="meta">
+
+                    <strong class="story-score"
+                            th:text="${ranked.score}">
+                        0
+                    </strong>
+                    Score
+
+                    <span th:text="${ranked.story.votes} + ' votes'">
+                        0 votes
+                    </span>
+
+                    <span th:text="${ranked.story.comments} + ' comments'">
+                        0 comments
+                    </span>
+
+                    <span th:if="${ranked.story.createdAt != null
+                                  and !ranked.story.createdAt.isEmpty()}"
+                          th:text="${ranked.story.createdAt}">
+                        Date
+                    </span>
+
+                    <a th:if="${ranked.story.url != null
+                               and !ranked.story.url.isEmpty()}"
+                       th:href="${ranked.story.url}"
+                       target="_blank"
+                       rel="noopener noreferrer">
+                        External link
+                    </a>
+
+                    <a th:href="@{/newsOpen/{id}(id=${ranked.story.id})}">
+                        Discuss
+                    </a>
+
+                </small>
+
+                <div class="story-explanation"
+                     th:text="${ranked.explanation}">
+                    Ranking explanation
+                </div>
+
+            </td>
+        </tr>
+
+    </table>
+
+    <div class="empty"
+         th:if="${stories == null or stories.isEmpty()}">
+        No stories found.
+    </div>
+
+</main>
+</body>
+</html>

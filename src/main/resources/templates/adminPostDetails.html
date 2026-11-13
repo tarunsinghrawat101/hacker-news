@@ -1,0 +1,27 @@
+<th:block xmlns:th="http://www.thymeleaf.org" th:fragment="detailsContent">
+<div class="post-expanded">
+    <p class="muted" th:text="${post.createdAt}">Created</p>
+    <p th:if="${post.url != null and !#strings.isEmpty(post.url)}">Link:
+        <a th:href="${post.url}" th:text="${post.url}" target="_blank" rel="noopener noreferrer">URL</a></p>
+    <p class="news-content" th:if="${post.content != null}" th:text="${post.content}">Text</p>
+    <p><strong>Current state:</strong>
+        <span th:if="${post.adminDeleted}">Deleted by administrator — locked</span>
+        <span th:unless="${post.adminDeleted}" th:text="${post.state}">State</span>
+    </p>
+    <form th:if="${!post.adminDeleted}" method="post" th:action="${postAction}" class="single-state-form">
+        <input type="hidden" name="postIds" th:value="${post.id}">
+        <label>Change this post to:
+            <select name="targetState">
+                <option th:each="state : ${T(com.example.hackerNews.entity.StoryState).values()}"
+                        th:value="${state}" th:text="${state}" th:selected="${state == post.state}">State</option>
+            </select>
+        </label>
+        <button type="submit">Apply to this post</button>
+    </form>
+    <form th:if="${!post.adminDeleted}" method="post" th:action="${deleteAction}"
+          onsubmit="return confirm('Remove this post from public view? The author will still see its removal status.');">
+        <input type="hidden" name="postIds" th:value="${post.id}">
+        <button type="submit">Remove this post from public view</button>
+    </form>
+</div>
+</th:block>

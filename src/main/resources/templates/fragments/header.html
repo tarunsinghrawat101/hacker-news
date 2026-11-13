@@ -1,0 +1,21 @@
+<th:block th:fragment="siteHeader" xmlns:th="http://www.w3.org/1999/xhtml">
+
+    <header class="site-header">
+        <a class="site-brand" th:href="@{/}">Hacker News</a>
+        <th:block th:if="${sessionUser != null and !admin}">
+            <a th:href="@{/createNewNews}">Submit</a>
+            <a th:href="@{/discover/recommended}">Recommended</a>
+            <a th:href="@{/discover/trending}">Trending</a>
+        </th:block>
+        <span class="site-spacer"></span>
+            <a th:if="${sessionUser != null}" th:href="@{/userProfile}">My Profile</a>
+            <a th:if="${admin}" th:href="@{/admin}">Admin Portal</a>
+            <a th:href="@{/welcome}">About</a>
+            <a th:if="${sessionUser != null}"
+                th:href="@{/logout}">Logout</a>
+
+            <a th:if="${sessionUser == null}"
+           th:href="@{/login}">Login</a>
+    </header>
+
+</th:block>

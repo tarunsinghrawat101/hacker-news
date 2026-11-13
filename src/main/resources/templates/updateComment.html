@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<main class="page-container">
+    <div th:replace="~{fragments/header :: siteHeader}"></div>
+<table>
+    <tr>
+        <td><p th:text="${news.title}"></td>
+        <td th:if="${news.content} != ''"><p th:text="${news.content}"></td>
+    </tr>
+    <form th:action="@{/commentUpdate/{commentId}(commentId=${commentUpdate.id})}" th:object="${commentUpdate}" method="post">
+        <tr>
+            <td align="center" colspan="2"><textarea th:field="${commentUpdate.comment}"
+                                                     th:rows="3" th:cols="80" required></textarea>
+                <button>Update Comment</button>
+            </td>
+        </tr>
+    </form>
+    <tr th:each="comment : ${comments}">
+        <td th:text="${comment.email}"></td>
+        <td th:text="${comment.name}"></td>
+        <td th:text="${comment.comment}"></td>
+        <td>
+            <form th:action="@{/updateComment/{commentId}(commentId=${comment.id})}"
+                  method="post">
+                <button>Update</button>
+            </form>
+        </td>
+        <td>
+            <form th:action="@{/deleteComment/{commentId}(commentId=${comment.id})}"
+                  method="post">
+                <button>Delete</button>
+            </form>
+        </td>
+    </tr>
+</table>
+</main>
+</body>
+</html>

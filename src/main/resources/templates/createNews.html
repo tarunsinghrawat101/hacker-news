@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"><title>Create post</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+    <style>
+        .editor-wrap{max-width:850px;margin:24px auto;padding:24px;background:#fff;border-radius:12px}
+        .editor-field{display:block;margin:18px 0}.editor-field input,.editor-field textarea{box-sizing:border-box;width:100%;padding:12px;border:1px solid #bbb;border-radius:6px}
+        .editor-field textarea{min-height:360px;resize:vertical}.word-count{font-size:.9rem;color:#555}.editor-actions{display:flex;gap:12px;flex-wrap:wrap}
+        .editor-help{color:#666;font-size:.9rem}
+    </style>
+</head>
+<body><main class="page-container">
+<div th:replace="~{fragments/header :: siteHeader}"></div>
+<section class="editor-wrap">
+    <h1>Create a post</h1>
+    <p class="error-message" th:if="${error}" th:text="${error}"></p>
+    <p class="editor-help">A URL is optional. Your written post is the primary content and must contain at least 1,292 words before submission for review. You can save an incomplete version as a draft.</p>
+    <form id="postForm" th:action="@{/saveNews}" th:object="${newsEntity}" method="post">
+        <label class="editor-field">Title *<input type="text" th:field="*{title}" required maxlength="255" placeholder="Enter a clear, descriptive title"></label>
+        <label class="editor-field">URL (optional)<input type="url" th:field="*{url}" placeholder="https://example.com"></label>
+        <label class="editor-field">Post text *<textarea id="content" th:field="*{content}" placeholder="Write your complete post here..."></textarea></label>
+        <p class="word-count">Word count: <strong id="wordCount">0</strong> / 1,292 minimum for submission</p>
+        <p id="validationMessage" class="editor-help" aria-live="polite"></p>
+        <div class="editor-actions">
+            <button type="submit" name="saveAsDraft" value="false" id="submitPost">Submit for admin review</button>
+            <button type="submit" name="saveAsDraft" value="true">Save as draft</button>
+        </div>
+    </form>
+</section>
+</main>
+<script>
+    (function () {
+        const postForm = document.getElementById('postForm');
+        const contentInput = document.getElementById('content');
+        const wordCountDisplay = document.getElementById('wordCount');
+        const validationMessage = document.getElementById('validationMessage');
+        const MIN_WORD_COUNT = 1292;
+
+        function getWordCount() {
+            const content = contentInput.value.trim();
+
+            return content
+                ? content.split(/\s+/u).length
+                : 0;
+        }
+
+        function updateWordCount() {
+            const currentWordCount = getWordCount();
+            const remainingWords = MIN_WORD_COUNT - currentWordCount;
+
+            wordCountDisplay.textContent = currentWordCount;
+
+            if (currentWordCount >= MIN_WORD_COUNT) {
+                validationMessage.textContent =
+                    'Minimum word count reached.';
+            } else {
+                validationMessage.textContent =
+                    'You need ' + remainingWords +
+                    ' more words to submit. You can still save this as a draft.';
+            }
+        }
+
+        function validatePostSubmission(event) {
+            if (event.submitter && event.submitter.value === 'true') {
+                return;
+            }
+            if (getWordCount() < MIN_WORD_COUNT) {
+                event.preventDefault();
+
+                validationMessage.textContent =
+                    'Submission requires at least 1,292 words. ' +
+                    'Save as draft to continue later.';
+
+                contentInput.focus();
+            }
+        }
+        contentInput.addEventListener('input', updateWordCount);
+        postForm.addEventListener('submit', validatePostSubmission);
+
+        updateWordCount();
+    })();
+</script>
+</body>
+</html>
